@@ -2,21 +2,22 @@
 #include "Direct3D.h"
 
 
+using Microsoft::WRL::ComPtr;
+
+
 //変数
 namespace Direct3D
 {
-	ID3D11Device* pDevice;		//デバイス
-	ID3D11DeviceContext* pContext;		//デバイスコンテキスト
-	IDXGISwapChain* pSwapChain;		//スワップチェイン
-	ID3D11RenderTargetView* pRenderTargetView;	//レンダーターゲットビュー
+	ComPtr<ID3D11Device> pDevice;		//デバイス
+	ComPtr<ID3D11DeviceContext> pContext;		//デバイスコンテキスト
+	ComPtr<IDXGISwapChain> pSwapChain;		//スワップチェイン
+	ComPtr<ID3D11RenderTargetView> pRenderTargetView;	//レンダーターゲットビュー
 
-	ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダー
-	ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダー
-	ID3D11InputLayout* pVertexLayout = nullptr;	//頂点インプットレイアウト
-	ID3D11RasterizerState* pRasterizerState = nullptr;	//ラスタライザー
+	ComPtr<ID3D11VertexShader> pVertexShader = nullptr;	//頂点シェーダー
+	ComPtr<ID3D11PixelShader> pPixelShader = nullptr;		//ピクセルシェーダー
+	ComPtr<ID3D11InputLayout> pVertexLayout = nullptr;	//頂点インプットレイアウト
+	ComPtr<ID3D11RasterizerState> pRasterizerState = nullptr;	//ラスタライザー
 }
-
-
 
 //初期化
 HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
@@ -58,10 +59,10 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 		0,					// 上の引数でレベルを何個指定したか
 		D3D11_SDK_VERSION,			// SDKのバージョン。必ずこの値
 		&scDesc,				// 上でいろいろ設定した構造体
-		&pSwapChain,				// 無事完成したSwapChainのアドレスが返ってくる
-		&pDevice,				// 無事完成したDeviceアドレスが返ってくる
+		pSwapChain.GetAddressOf(),				// 無事完成したSwapChainのアドレスが返ってくる
+		pDevice.GetAddressOf(),				// 無事完成したDeviceアドレスが返ってくる
 		&level,					// 無事完成したDevice、Contextのレベルが返ってくる
-		&pContext);				// 無事完成したContextのアドレスが返ってくる
+		pContext.GetAddressOf());				// 無事完成したContextのアドレスが返ってくる
 
 
 	if (FAILED(hr))
@@ -73,7 +74,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 	///////////////////////////レンダーターゲットビュー作成///////////////////////////////
 //スワップチェーンからバックバッファを取得（バックバッファ ＝ レンダーターゲット）
-	ID3D11Texture2D* pBackBuffer;
+	ComPtr<ID3D11Texture2D> pBackBuffer;
 	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	if (FAILED(hr))
 	{
@@ -84,7 +85,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 
 	//レンダーターゲットビューを作成
-	hr = pDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
+	hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, pRenderTargetView.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, L"レンダーターゲットビューの作成に失敗しました", L"エラー", MB_OK);
@@ -92,7 +93,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 		return hr;
 	}
 	//一時的にバックバッファを取得しただけなので解放
-	pBackBuffer->Release();
+	//pBackBuffer->Release();
 
 
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
@@ -107,7 +108,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 	//データを画面に描画するための一通りの設定（パイプライン）
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // データの入力種類を指定
-	pContext->OMSetRenderTargets(1, &pRenderTargetView, nullptr);            // 描画先を設定
+	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
 	pContext->RSSetViewports(1, &vp);
 
 	//シェーダー準備
@@ -138,7 +139,8 @@ HRESULT Direct3D::InitShader()
 	//頂点インプットレイアウト
 	D3D11_INPUT_ELEMENT_DESC layout[] = 
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	hr = pDevice->CreateInputLayout(layout, 1, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &pVertexLayout);
 	if (FAILED(hr))
@@ -168,9 +170,9 @@ HRESULT Direct3D::InitShader()
 	//ラスタライザ作成
 	D3D11_RASTERIZER_DESC rdc = {};
 	rdc.CullMode = D3D11_CULL_NONE;  //多角形の裏側は描画しない（カリング）
-	rdc.FillMode = D3D11_FILL_WIREFRAME; //多角形の内部を塗りつぶす
+	rdc.FillMode = D3D11_FILL_SOLID; //多角形の内部を塗りつぶす
 	rdc.FrontCounterClockwise = FALSE; //反時計回りを表にするかどうか（がfalseなので時計回りが表）
-	hr = pDevice->CreateRasterizerState(&rdc, &pRasterizerState);
+	hr = pDevice->CreateRasterizerState(&rdc, pRasterizerState.GetAddressOf());
 	if (FAILED(hr))
 	{
 		//エラー処理
@@ -180,10 +182,10 @@ HRESULT Direct3D::InitShader()
 
 
 	//それぞれをデバイスコンテキストにセット
-	pContext->VSSetShader(pVertexShader, NULL, 0);	//頂点シェーダー
-	pContext->PSSetShader(pPixelShader, NULL, 0);	//ピクセルシェーダー
-	pContext->IASetInputLayout(pVertexLayout);	//頂点インプットレイアウト
-	pContext->RSSetState(pRasterizerState);		//ラスタライザー
+	pContext->VSSetShader(pVertexShader.Get(), NULL, 0);	//頂点シェーダー
+	pContext->PSSetShader(pPixelShader.Get(), NULL, 0);	//ピクセルシェーダー
+	pContext->IASetInputLayout(pVertexLayout.Get());	//頂点インプットレイアウト
+	pContext->RSSetState(pRasterizerState.Get());		//ラスタライザー
 
 }
 
@@ -194,7 +196,7 @@ void Direct3D::BeginDraw()
 	float clearColor[4] = { 255/255.0f, 250/255.0f, 205/255.0f, 1.0f };//R,G,B,A
 
 	//画面をクリア
-	pContext->ClearRenderTargetView(pRenderTargetView, clearColor);
+	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
 }
 
 
@@ -214,13 +216,12 @@ void Direct3D::Release()
 {
 	//解放処理
 
-	pRasterizerState->Release();
-	pVertexLayout->Release();
-	pPixelShader->Release();
-	pVertexShader->Release();
-
-	pRenderTargetView->Release();
-	pSwapChain->Release();
-	pContext->Release();
-	pDevice->Release();
+	//pRasterizerState->Release();
+	//pVertexLayout->Release();
+	//pPixelShader->Release();
+	//pVertexShader->Release();
+	//pRenderTargetView->Release();
+	//pSwapChain->Release();
+	//pContext->Release();
+	//pDevice->Release();
 }

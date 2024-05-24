@@ -2,7 +2,7 @@
  // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
 //───────────────────────────────────────
-cbuffer global
+cbuffer global : register(b0)
 {
     //変換行列、視点、光源
     float4x4 matWVP; // ワールド・ビュー・プロジェクションの合成行列
@@ -14,12 +14,13 @@ cbuffer global
 struct VS_OUT
 {
     float4 pos : SV_POSITION; //位置
+    float4 col : COLOR;
 };
 
 //───────────────────────────────────────
 // 頂点シェーダ
 //───────────────────────────────────────
-VS_OUT VS(float4 pos : POSITION)
+VS_OUT VS(float4 pos : POSITION, float4 col : COLOR)
 {
 	//ピクセルシェーダーへ渡す情報
     VS_OUT outData;
@@ -27,6 +28,7 @@ VS_OUT VS(float4 pos : POSITION)
 	//ローカル座標に、ワールド・ビュー・プロジェクション行列をかけて
 	//スクリーン座標に変換し、ピクセルシェーダーへ
     outData.pos = mul(pos, matWVP);
+    outData.col = col;
 
 	//まとめて出力
     return outData;
@@ -37,5 +39,6 @@ VS_OUT VS(float4 pos : POSITION)
 //───────────────────────────────────────
 float4 PS(VS_OUT inData) : SV_Target
 {
-    return float4(0, 0, 0, 1); //ピクセルを塗る色
+    //return float4(0, 0, 0, 1); //ピクセルを塗る色
+    return inData.col;
 }

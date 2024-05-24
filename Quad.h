@@ -3,6 +3,12 @@
 #include <DirectXMath.h>
 using namespace DirectX;
 
+typedef struct _vertexPositionColor
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 color;
+} VertexPositionColor;
+
 //コンスタントバッファー
 struct CONSTANT_BUFFER
 {

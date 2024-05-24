@@ -1,5 +1,7 @@
 #include "Quad.h"
 
+
+
 Quad::Quad()
 {
 }
@@ -11,45 +13,51 @@ Quad::~Quad()
 void Quad::Initialize()
 {
 	// 頂点情報
-	XMVECTOR vertices[] =
+	VertexPositionColor vertices[] =
 	{
-		 { -0.5f,  0.5f, -0.5f },
-		 {  0.5f,  0.5f, -0.5f }, 
-		 { -0.5f, -0.5f, -0.5f }, 
-		 {  0.5f, -0.5f, -0.5f }, 
+		{{ -0.5f,  0.5f, -0.5f }, {1,   0,   0}},
+		{{  0.5f,  0.5f, -0.5f }, {1,   0,   0}},
+		{{ -0.5f, -0.5f, -0.5f }, {1,   0,   0}},
+		{{  0.5f, -0.5f, -0.5f }, {1,   0,   0}},
 
-		 { -0.5f,  0.5f,  0.5f }, 
-		 { -0.5f, -0.5f,  0.5f }, 
-		 {  0.5f,  0.5f,  0.5f }, 
-		 {  0.5f, -0.5f,  0.5f }, 
+		{{ -0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{ -0.5f, -0.5f,  0.5f }, {1,   0,   0}},
+		{{  0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{  0.5f, -0.5f,  0.5f }, {1,   0,   0}},
 
-		 { -0.5f,  0.5f,  0.5f }, 
-		 { -0.5f,  0.5f, -0.5f }, 
-		 { -0.5f, -0.5f,  0.5f }, 
-		 { -0.5f, -0.5f, -0.5f }, 
+		{{ -0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{ -0.5f,  0.5f, -0.5f }, {1,   0,   0}},
+		{{ -0.5f, -0.5f,  0.5f }, {1,   0,   0}},
+		{{ -0.5f, -0.5f, -0.5f }, {1,   0,   0}},
 
-		 {  0.5f,  0.5f,  0.5f }, 
-		 {  0.5f, -0.5f,  0.5f }, 
-		 {  0.5f,  0.5f, -0.5f }, 
-		 {  0.5f, -0.5f, -0.5f }, 
+		{{  0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{  0.5f, -0.5f,  0.5f }, {1,   0,   0}},
+		{{  0.5f,  0.5f, -0.5f }, {1,   0,   0}},
+		{{  0.5f, -0.5f, -0.5f }, {1,   0,   0}},
 
-		 { -0.5f,  0.5f,  0.5f }, 
-		 {  0.5f,  0.5f,  0.5f }, 
-		 { -0.5f,  0.5f, -0.5f }, 
-		 {  0.5f,  0.5f, -0.5f }, 
+		{{ -0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{  0.5f,  0.5f,  0.5f }, {1,   0,   0}},
+		{{ -0.5f,  0.5f, -0.5f }, {1,   0,   0}},
+		{{  0.5f,  0.5f, -0.5f }, {1,   0,   0}},
 
-		 { -0.5f, -0.5f,  0.5f }, 
-		 { -0.5f, -0.5f, -0.5f }, 
-		 {  0.5f, -0.5f,  0.5f }, 
-		 {  0.5f, -0.5f, -0.5f }
+		{{ -0.5f, -0.5f,  0.5f },{1,   0,   0}},
+		{{ -0.5f, -0.5f, -0.5f },{1,   0,   0}},
+		{{  0.5f, -0.5f,  0.5f },{1,   0,   0}},
+		{{  0.5f, -0.5f, -0.5f },{ 1,   0,   0 }},
 	};
 
 	//インデックス情報
-	int index[] = { 0,2,3, 0,1,2 };
+	int index[] = {
+	 0,  1,  2,     3,  2,  1,
+	 4,  5,  6,     7,  6,  5,
+	 8,  9, 10,    11, 10,  9,
+	12, 13, 14,    15, 14, 13,
+	16, 17, 18,    19, 18, 17,
+	20, 21, 22,    23, 22, 21, };
 
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(vertices);
+	bd_vertex.ByteWidth = sizeof(VertexPositionColor);
 	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
 	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd_vertex.CPUAccessFlags = 0;
@@ -94,7 +102,7 @@ void Quad::Draw()
 	XMVECTOR target = { 0, 0, 0, 0 };	//カメラの焦点
 	XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
 	XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
-	
+
 
 	CONSTANT_BUFFER cb;
 	cb.matWVP = XMMatrixTranspose(view * proj);
