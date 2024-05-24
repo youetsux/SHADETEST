@@ -6,6 +6,7 @@ cbuffer global : register(b0)
 {
     //変換行列、視点、光源
     float4x4 matWVP; // ワールド・ビュー・プロジェクションの合成行列
+    int isShadow;
 };
 
 //───────────────────────────────────────
@@ -40,5 +41,8 @@ VS_OUT VS(float4 pos : POSITION, float4 col : COLOR)
 float4 PS(VS_OUT inData) : SV_Target
 {
     //return float4(0, 0, 0, 1); //ピクセルを塗る色
-    return inData.col;
+    if(isShadow == 1)
+        return float4(0, 0, 0, 1);
+    else
+        return inData.col;
 }

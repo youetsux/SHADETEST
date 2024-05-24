@@ -48,12 +48,12 @@ void Quad::Initialize()
 
 	//インデックス情報
 	int index[] = {
-	 0,  2,  1,     3,  1,  2,
-	 4,  6,  5,     7,  5,  6,
-	 8,  10, 9,    11, 9,  10,
-	12, 14, 13,    15, 13, 14,
-	16, 18, 17,    19, 17, 18,
-	20, 22, 21,    23, 21, 22, };
+	 0,  1,  2,     3,  2,  1,
+	 4,  5,  6,     7,  6,  5,
+	 8,  9, 10,    11, 10,  9,
+	12, 13, 14,    15, 14, 13,
+	16, 18, 17,    19, 18, 17,
+	20, 21, 22,    23, 22, 21, };
 
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
@@ -98,34 +98,92 @@ void Quad::Initialize()
 void Quad::Draw()
 {
 	//コンスタントバッファに渡す情報
-	XMVECTOR position = { 3, 3, -5, 0 };	//カメラの位置
+	XMVECTOR position = { 0, 5, -5, 0 };	//カメラの位置
 	XMVECTOR target = { 0, 0, 0, 0 };	//カメラの焦点
 	XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
 	XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
 
+	static float angleRadians = 0;
+	const auto DELTA = DirectX::XMConvertToRadians(0.1f);
+	angleRadians += DELTA;
+	// XMMATRIX型の値を作る！
+	//auto m = DirectX::XMMatrixIdentity();
+	auto m = DirectX::XMMatrixRotationY(angleRadians);
+
+	// XMMATRIX型からXMFloat4x4型にStoreする
+	//DirectX::XMStoreFloat4x4(&m_constant->Buffer.Model, m);
+
+
 	CONSTANT_BUFFER cb;
-	cb.matWVP = XMMatrixTranspose(view * proj);
+	cb.matWVP = XMMatrixTranspose(m*view* proj);
+	cb.isShadow = 0;
 
 	D3D11_MAPPED_SUBRESOURCE pdata;
-	Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+	Direct3D::pContext->Map(pConstantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
 	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-	Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//再開
+	Direct3D::pContext->Unmap(pConstantBuffer_.Get(), 0);	//再開
 
 	//頂点バッファ
 	UINT stride = sizeof(VertexPositionColor);
 	UINT offset = 0;
-	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
+	Direct3D::pContext->IASetVertexBuffers(0, 1, pVertexBuffer_.GetAddressOf(), &stride, &offset);
 
 	// インデックスバッファーをセット
 	stride = sizeof(int);
 	offset = 0;
-	Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
+	Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	//コンスタントバッファ
-	Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
-	Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
+	Direct3D::pContext->VSSetConstantBuffers(0, 1, pConstantBuffer_.GetAddressOf());	//頂点シェーダー用	
+	Direct3D::pContext->PSSetConstantBuffers(0, 1, pConstantBuffer_.GetAddressOf());	//ピクセルシェーダー用
 
-	Direct3D::pContext->DrawIndexed(24, 0, 0);
+	Direct3D::pContext->DrawIndexed(36, 0, 0);
+}
+
+void Quad::DropShadow()
+{
+	//コンスタントバッファに渡す情報
+	XMVECTOR position = { 0, 5, -5, 0 };	//カメラの位置
+	XMVECTOR target = { 0, 0, 0, 0 };	//カメラの焦点
+	XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
+	XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
+
+	static float angleRadians = 0;
+	const auto DELTA = DirectX::XMConvertToRadians(0.1f);
+	angleRadians += DELTA;
+	// XMMATRIX型の値を作る！
+	//auto m = DirectX::XMMatrixIdentity();
+	auto m = DirectX::XMMatrixRotationY(angleRadians);
+
+	XMMATRIX shadow = XMMatrixShadow({ 0,1,0,2 }, { 0,15,0 });
+	// XMMATRIX型からXMFloat4x4型にStoreする
+	//DirectX::XMStoreFloat4x4(&m_constant->Buffer.Model, m);
+
+
+	CONSTANT_BUFFER cb;
+	cb.matWVP = XMMatrixTranspose(m * shadow * view * proj);
+	cb.isShadow = 1;
+
+	D3D11_MAPPED_SUBRESOURCE pdata;
+	Direct3D::pContext->Map(pConstantBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+	Direct3D::pContext->Unmap(pConstantBuffer_.Get(), 0);	//再開
+
+	//頂点バッファ
+	UINT stride = sizeof(VertexPositionColor);
+	UINT offset = 0;
+	Direct3D::pContext->IASetVertexBuffers(0, 1, pVertexBuffer_.GetAddressOf(), &stride, &offset);
+
+	// インデックスバッファーをセット
+	stride = sizeof(int);
+	offset = 0;
+	Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	//コンスタントバッファ
+	Direct3D::pContext->VSSetConstantBuffers(0, 1, pConstantBuffer_.GetAddressOf());	//頂点シェーダー用	
+	Direct3D::pContext->PSSetConstantBuffers(0, 1, pConstantBuffer_.GetAddressOf());	//ピクセルシェーダー用
+
+	Direct3D::pContext->DrawIndexed(36, 0, 0);
 }
 
 void Quad::Release()

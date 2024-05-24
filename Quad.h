@@ -13,18 +13,20 @@ typedef struct _vertexPositionColor
 struct CONSTANT_BUFFER
 {
 	XMMATRIX	matWVP;
+	int		isShadow;
 };
 
 class Quad
 {
-	ID3D11Buffer* pVertexBuffer_;	//頂点バッファ
-	ID3D11Buffer* pIndexBuffer_;    //インデックスバッファ
-	ID3D11Buffer* pConstantBuffer_;	//コンスタントバッファ
+	ComPtr<ID3D11Buffer> pVertexBuffer_;	//頂点バッファ
+	ComPtr<ID3D11Buffer> pIndexBuffer_;    //インデックスバッファ
+	ComPtr<ID3D11Buffer> pConstantBuffer_;	//コンスタントバッファ
 public:
 	Quad();
 	~Quad();
 	void Initialize();
 	void Draw();
+	void DropShadow();
 	void Release();
 };
 

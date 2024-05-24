@@ -12,6 +12,7 @@ namespace Direct3D
 	ComPtr<ID3D11DeviceContext> pContext;		//デバイスコンテキスト
 	ComPtr<IDXGISwapChain> pSwapChain;		//スワップチェイン
 	ComPtr<ID3D11RenderTargetView> pRenderTargetView;	//レンダーターゲットビュー
+	ComPtr<ID3D11DepthStencilView> pDepthStencilView; //DepthStencilView
 
 	ComPtr<ID3D11VertexShader> pVertexShader = nullptr;	//頂点シェーダー
 	ComPtr<ID3D11PixelShader> pPixelShader = nullptr;		//ピクセルシェーダー
@@ -73,7 +74,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	}
 
 	///////////////////////////レンダーターゲットビュー作成///////////////////////////////
-//スワップチェーンからバックバッファを取得（バックバッファ ＝ レンダーターゲット）
+	//スワップチェーンからバックバッファを取得（バックバッファ ＝ レンダーターゲット）
 	ComPtr<ID3D11Texture2D> pBackBuffer;
 	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	if (FAILED(hr))
@@ -94,6 +95,35 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	}
 	//一時的にバックバッファを取得しただけなので解放
 	//pBackBuffer->Release();
+
+	//デプスステンシルビュー
+	ComPtr<ID3D11Texture2D> m_pDepthStencilTexture;
+	D3D11_TEXTURE2D_DESC txDesc;
+	ZeroMemory(&txDesc, sizeof(txDesc));
+	txDesc.Width = winW;
+	txDesc.Height = winH;
+	txDesc.MipLevels = 1;
+	txDesc.ArraySize = 1;
+	txDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	txDesc.SampleDesc.Count = 1;
+	txDesc.SampleDesc.Quality = 0;
+	txDesc.Usage = D3D11_USAGE_DEFAULT;
+	txDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	txDesc.CPUAccessFlags = 0;
+	txDesc.MiscFlags = 0;
+	hr = pDevice->CreateTexture2D(&txDesc, NULL, m_pDepthStencilTexture.GetAddressOf());
+	if (FAILED(hr))
+		return hr;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsDesc;
+	ZeroMemory(&dsDesc, sizeof(dsDesc));
+	dsDesc.Format = txDesc.Format;
+	dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsDesc.Texture2D.MipSlice = 0;
+	hr = pDevice->CreateDepthStencilView(m_pDepthStencilTexture.Get(), &dsDesc, pDepthStencilView.GetAddressOf());
+	if (FAILED(hr))
+		return hr;
+
 
 
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
@@ -169,7 +199,7 @@ HRESULT Direct3D::InitShader()
 
 	//ラスタライザ作成
 	D3D11_RASTERIZER_DESC rdc = {};
-	rdc.CullMode = D3D11_CULL_BACK;  //多角形の裏側は描画しない（カリング）
+	rdc.CullMode = D3D11_CULL_NONE;  //多角形の裏側は描画しない（カリング）
 	rdc.FillMode = D3D11_FILL_SOLID; //多角形の内部を塗りつぶす
 	rdc.FrontCounterClockwise = FALSE; //反時計回りを表にするかどうか（がfalseなので時計回りが表）
 	hr = pDevice->CreateRasterizerState(&rdc, pRasterizerState.GetAddressOf());
@@ -197,6 +227,10 @@ void Direct3D::BeginDraw()
 
 	//画面をクリア
 	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
+
+	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());
+	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
+	pContext->ClearDepthStencilView(pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 

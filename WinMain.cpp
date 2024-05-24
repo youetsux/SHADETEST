@@ -86,7 +86,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 			Direct3D::BeginDraw();
 
 			//‚±‚±‚É©‘O‚Ì•`‰æˆ—‚ğ’Ç‰Á‚µ‚Ä‚¢‚­
+			q->DropShadow();
 			q->Draw();
+			
 
 			//•`‰æˆ—
 			Direct3D::EndDraw();
