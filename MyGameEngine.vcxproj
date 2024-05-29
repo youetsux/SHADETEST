@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="Quad.h" />
+    <ClInclude Include="StringToWideStringConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="simple3D.hlsl">

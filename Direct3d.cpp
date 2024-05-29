@@ -1,9 +1,9 @@
 #include <d3dcompiler.h>
 #include "Direct3D.h"
-
+#include "StringToWideStringConverter.h"
 
 using Microsoft::WRL::ComPtr;
-
+using S
 
 //変数
 namespace Direct3D
@@ -217,6 +217,7 @@ HRESULT Direct3D::InitShader()
 	pContext->IASetInputLayout(pVertexLayout.Get());	//頂点インプットレイアウト
 	pContext->RSSetState(pRasterizerState.Get());		//ラスタライザー
 
+	return hr;
 }
 
 //描画開始

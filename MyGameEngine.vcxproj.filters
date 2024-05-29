@@ -28,6 +28,7 @@
     <ClInclude Include="Quad.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="StringToWideStringConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="simple3D.hlsl" />

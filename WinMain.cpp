@@ -1,16 +1,18 @@
 //インクルード
 #include <Windows.h>
 #include "Direct3D.h"
-
+#include <string>
+#include "StringToWideStringConverter.h"
 #include "Quad.h"
 
 //リンカ
 #pragma comment(lib, "d3d11.lib")
 
+using StrConv = StringConverter;
 
 	//定数宣言
 	const wchar_t* WIN_CLASS_NAME = L"SampleGame";  //ウィンドウクラス名
-	const wchar_t* APP_NAME = L"サンプルゲーム"; //アプリケーション名
+	//const wchar_t* APP_NAME = L"サンプルゲーム"; //アプリケーション名
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
 
@@ -42,6 +44,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	AdjustWindowRect(&winRect, WS_OVERLAPPEDWINDOW, FALSE);
 	int winW = winRect.right - winRect.left;     //ウィンドウ幅
 	int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
+
+	std::string appName = "スーパー俺ゲーム";
+	LPCWSTR APP_NAME = StringConverter::StringToWide(appName).c_str();
 
 	//ウィンドウを作成
 	HWND hWnd = CreateWindow(
