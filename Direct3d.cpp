@@ -3,7 +3,7 @@
 #include "StringToWideStringConverter.h"
 
 using Microsoft::WRL::ComPtr;
-using S
+
 
 //変数
 namespace Direct3D
@@ -18,6 +18,13 @@ namespace Direct3D
 	ComPtr<ID3D11PixelShader> pPixelShader = nullptr;		//ピクセルシェーダー
 	ComPtr<ID3D11InputLayout> pVertexLayout = nullptr;	//頂点インプットレイアウト
 	ComPtr<ID3D11RasterizerState> pRasterizerState = nullptr;	//ラスタライザー
+	ComPtr<ID3D11BlendState> pBlendState = nullptr;
+	
+	::EffekseerRendererDX11::RendererRef gRenderer;
+	::Effekseer::ManagerRef gManager;
+	::Effekseer::EffectRef gEffect;
+	::Effekseer::Backend::GraphicsDeviceRef gEFDev;
+
 }
 
 //初期化
@@ -126,6 +133,27 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 
 
+	// RenderTarget0へのAlphaブレンド描画設定
+	D3D11_BLEND_DESC BlendState;
+	ZeroMemory(&BlendState, sizeof(D3D11_BLEND_DESC));
+	BlendState.AlphaToCoverageEnable = FALSE;
+	BlendState.IndependentBlendEnable = FALSE;
+	BlendState.RenderTarget[0].BlendEnable = TRUE;
+	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	hr = pDevice->CreateBlendState(&BlendState, pBlendState.GetAddressOf());
+	if (FAILED(hr)) {
+		MessageBox(NULL, L"ブレンドステートが生成できません", L"エラー", MB_OK);
+		return hr;
+	}
+
+
+
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
 //レンダリング結果を表示する範囲
 	D3D11_VIEWPORT vp;
@@ -140,6 +168,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // データの入力種類を指定
 	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
 	pContext->RSSetViewports(1, &vp);
+	FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
+	pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
 
 	//シェーダー準備
 	hr = InitShader();
@@ -215,6 +245,7 @@ HRESULT Direct3D::InitShader()
 	pContext->VSSetShader(pVertexShader.Get(), NULL, 0);	//頂点シェーダー
 	pContext->PSSetShader(pPixelShader.Get(), NULL, 0);	//ピクセルシェーダー
 	pContext->IASetInputLayout(pVertexLayout.Get());	//頂点インプットレイアウト
+
 	pContext->RSSetState(pRasterizerState.Get());		//ラスタライザー
 
 	return hr;

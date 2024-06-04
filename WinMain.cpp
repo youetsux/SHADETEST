@@ -8,6 +8,14 @@
 //リンカ
 #pragma comment(lib, "d3d11.lib")
 
+#if _DEBUG
+#pragma comment(lib, "Effekseerd.lib" )
+#pragma comment(lib, "EffekseerRendererDX11d.lib" )
+#else
+#pragma comment(lib, "Effekseer.lib" )
+#pragma comment(lib, "EffekseerRendererDX11.lib" )
+#endif
+
 using StrConv = StringConverter;
 
 	//定数宣言
@@ -45,13 +53,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	int winW = winRect.right - winRect.left;     //ウィンドウ幅
 	int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
 
-	std::string appName = "スーパー俺ゲーム";
-	LPCWSTR APP_NAME = StringConverter::StringToWide(appName).c_str();
+	std::wstring appName = L"スーパー俺ゲーム";
+	//LPCWSTR APP_NAME = StringConverter::StringToWide(appName);
 
 	//ウィンドウを作成
 	HWND hWnd = CreateWindow(
 		WIN_CLASS_NAME,         //ウィンドウクラス名
-		APP_NAME,				//タイトルバーに表示する内容
+		appName.c_str(),				//タイトルバーに表示する内容
 		WS_OVERLAPPEDWINDOW, //スタイル（普通のウィンドウ）
 		CW_USEDEFAULT,       //表示位置左（おまかせ）
 		CW_USEDEFAULT,       //表示位置上（おまかせ）
@@ -65,12 +73,45 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 
 	//ウィンドウを表示
 	ShowWindow(hWnd, nCmdShow);
+
+	CoInitializeEx(nullptr, 0);
 	//Direct3D初期化
 	Direct3D::Initialize(winW, winH, hWnd);
 
 	Quad* q;
 	q = new Quad();
 	q->Initialize();
+
+
+	Direct3D::gManager = ::Effekseer::Manager::Create(8000);
+
+	// Setup effekseer modules
+	// Effekseerのモジュールをセットアップする
+	Direct3D::gEFDev = ::EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
+
+	// Create a renderer of effects
+	// エフェクトのレンダラーの作成
+	Direct3D::gRenderer = ::EffekseerRendererDX11::Renderer::Create(Direct3D::gEFDev, 8000);
+
+	// Sprcify rendering modules
+	// 描画モジュールの設定
+	Direct3D::gManager->SetSpriteRenderer(Direct3D::gRenderer->CreateSpriteRenderer());
+	Direct3D::gManager->SetRibbonRenderer(Direct3D::gRenderer->CreateRibbonRenderer());
+	Direct3D::gManager->SetRingRenderer(Direct3D::gRenderer->CreateRingRenderer());
+	Direct3D::gManager->SetTrackRenderer(Direct3D::gRenderer->CreateTrackRenderer());
+	Direct3D::gManager->SetModelRenderer(Direct3D::gRenderer->CreateModelRenderer());
+
+	// Specify a texture, model, curve and material loader
+	// It can be extended by yourself. It is loaded from a file on now.
+	// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
+	// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
+	Direct3D::gManager->SetTextureLoader(Direct3D::gRenderer->CreateTextureLoader());
+	Direct3D::gManager->SetModelLoader(Direct3D::gRenderer->CreateModelLoader());
+	Direct3D::gManager->SetMaterialLoader(Direct3D::gRenderer->CreateMaterialLoader());
+	Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
+	
+
+	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (EFK_CHAR *)L"Laser01.efkefc");
 
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
@@ -94,6 +135,80 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 			q->DropShadow();
 			q->Draw();
 			
+			{
+				// Specify a position of view
+				// 視点位置を確定
+				auto viewerPosition = ::Effekseer::Vector3D(10.0f, 5.0f, 20.0f);
+
+				// Specify a projection matrix
+				// 投影行列を設定
+				::Effekseer::Matrix44 projectionMatrix;
+				projectionMatrix.PerspectiveFovLH(90.0f / 180.0f * 3.14f, (float)winW/ (float)winH, 1.0f, 500.0f);
+
+				// Specify a camera matrix
+				// カメラ行列を設定
+				::Effekseer::Matrix44 cameraMatrix;
+				cameraMatrix.LookAtLH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
+				static int32_t time = 0;
+				Effekseer::Handle efkHandle = 0;
+				if (time % 120 == 0)
+				{
+					// Play an effect
+					// エフェクトの再生
+					efkHandle = Direct3D::gManager->Play(Direct3D::gEffect, 0, 0, 0);
+				}
+
+				if (time % 120 == 119)
+				{
+					// Stop effects
+					// エフェクトの停止
+					Direct3D::gManager->StopEffect(efkHandle);
+				}
+
+				// Move the effect
+				// エフェクトの移動
+				Direct3D::gManager->AddLocation(efkHandle, ::Effekseer::Vector3D(0.2f, 0.0f, 0.0f));
+
+				// Set layer parameters
+				// レイヤーパラメータの設定
+				Effekseer::Manager::LayerParameter layerParameter;
+				layerParameter.ViewerPosition = viewerPosition;
+				Direct3D::gManager->SetLayerParameter(0, layerParameter);
+
+				// Update the manager
+				// マネージャーの更新
+				Effekseer::Manager::UpdateParameter updateParameter;
+				Direct3D::gManager->Update(updateParameter);
+
+				// Update a time
+				// 時間を更新する
+				Direct3D::gRenderer->SetTime(time / 60.0f);
+
+				// Specify a projection matrix
+				// 投影行列を設定
+				Direct3D::gRenderer->SetProjectionMatrix(projectionMatrix);
+
+				// Specify a camera matrix
+				// カメラ行列を設定
+				Direct3D::gRenderer->SetCameraMatrix(cameraMatrix);
+
+				// Begin to rendering effects
+				// エフェクトの描画開始処理を行う。
+				Direct3D::gRenderer->BeginRendering();
+
+				// Render effects
+				// エフェクトの描画を行う。
+				Effekseer::Manager::DrawParameter drawParameter;
+				drawParameter.ZNear = 0.0f;
+				drawParameter.ZFar = 1000.0f;
+				drawParameter.ViewProjectionMatrix = Direct3D::gRenderer->GetCameraProjectionMatrix();
+				Direct3D::gManager->Draw(drawParameter);
+
+				// Finish to rendering effects
+				// エフェクトの描画終了処理を行う。
+				Direct3D::gRenderer->EndRendering();
+				time++;
+			}
 
 			//描画処理
 			Direct3D::EndDraw();
@@ -102,6 +217,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	}
 
 	Direct3D::Release();
+	
+	Direct3D::gEffect->Release();
+	//Direct3D::gManager->Release();
+	Direct3D::gRenderer->Release();
+	Direct3D::gEFDev->Release();
 
 	return 0;
 }

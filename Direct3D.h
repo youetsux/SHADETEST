@@ -1,6 +1,8 @@
 #pragma once
 #include <wrl\client.h>
 #include <d3d11.h>
+#include <Effekseer.h>
+#include <EffekseerRendererDX11.h>
 
 //ƒŠƒ“ƒJ
 #pragma comment(lib, "d3d11.lib")
@@ -24,5 +26,13 @@ namespace Direct3D
 
 	extern ComPtr <ID3D11Device> pDevice;
 	extern ComPtr<ID3D11DeviceContext> pContext;
+	extern ComPtr<ID3D11BlendState> pBlendState;
+
+	extern ::EffekseerRendererDX11::RendererRef gRenderer;
+	extern ::Effekseer::ManagerRef gManager;
+	extern ::Effekseer::EffectRef gEffect;
+	extern ::Effekseer::Backend::GraphicsDeviceRef gEFDev;
+
+	
 
 };
