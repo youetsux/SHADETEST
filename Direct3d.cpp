@@ -152,6 +152,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 		return hr;
 	}
 
+	FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
+	pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
 
 
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
@@ -168,8 +170,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // データの入力種類を指定
 	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
 	pContext->RSSetViewports(1, &vp);
-	FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
-	pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
+
+	
 
 	//シェーダー準備
 	hr = InitShader();
