@@ -6,7 +6,7 @@
 namespace Efk
 {
 	void Init();
-	void Uninit();
+	void Release();
 	void Update();
 	void Draw();
 	Effekseer::Handle Play(const char16_t* path, float x, float y, float z);
