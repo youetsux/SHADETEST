@@ -264,8 +264,8 @@ HRESULT Direct3D::InitShader()
 void Direct3D::BeginDraw()
 {
 	//”wŒi‚ÌF
-	float clearColor[4] = { 255/255.0f, 250/255.0f, 205/255.0f, 1.0f };//R,G,B,A
-
+	//float clearColor[4] = { 255/255.0f, 250/255.0f, 205/255.0f, 1.0f };//R,G,B,A
+	float clearColor[4] = { 0, 0, 0, 1.0f };
 	//‰æ–Ê‚ðƒNƒŠƒA
 	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
 

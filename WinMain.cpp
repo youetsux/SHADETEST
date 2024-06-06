@@ -132,8 +132,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 			Direct3D::BeginDraw();
 
 			//‚±‚±‚ÉŽ©‘O‚Ì•`‰æˆ—‚ð’Ç‰Á‚µ‚Ä‚¢‚­
-			//q->DropShadow();
-			//q->Draw();
+			q->DropShadow();
+			q->Draw();
 			
 			{
 				// Specify a position of view
