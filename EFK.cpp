@@ -60,22 +60,22 @@ void Efk::Update()
 
 void Efk::Draw()
 {
-	g_efkRender->SetProjectionMatrix(GetMat(CameraBase::GetPrimary()->GetProj()));
-	g_efkRender->SetCameraMatrix(GetMat(CameraBase::GetPrimary()->GetView()));
+	//g_efkRender->SetProjectionMatrix(GetMat(CameraBase::GetPrimary()->GetProj()));
+	//g_efkRender->SetCameraMatrix(GetMat(CameraBase::GetPrimary()->GetView()));
 
-	g_efkRender->BeginRendering();
+	//g_efkRender->BeginRendering();
 
-	// Render effects
-	// エフェクトの描画を行う。
-	Effekseer::Manager::DrawParameter drawParameter;
-	drawParameter.ZNear = 0.0f;
-	drawParameter.ZFar = 1;
-	drawParameter.ViewProjectionMatrix = g_efkRender->GetCameraProjectionMatrix();
-	g_efkManager->Draw(drawParameter);
+	//// Render effects
+	//// エフェクトの描画を行う。
+	//Effekseer::Manager::DrawParameter drawParameter;
+	//drawParameter.ZNear = 0.0f;
+	//drawParameter.ZFar = 1;
+	//drawParameter.ViewProjectionMatrix = g_efkRender->GetCameraProjectionMatrix();
+	//g_efkManager->Draw(drawParameter);
 
-	// Finish to rendering effects
-	// エフェクトの描画終了処理を行う。
-	g_efkRender->EndRendering();
+	//// Finish to rendering effects
+	//// エフェクトの描画終了処理を行う。
+	//g_efkRender->EndRendering();
 }
 
 Effekseer::Handle Efk::Play(const char16_t* path, float x, float y, float z)

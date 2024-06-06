@@ -70,11 +70,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		hInstance,           //インスタンス
 		NULL                 //パラメータ（なし）
 	);
-
+	CoInitializeEx(nullptr, 0);
 	//ウィンドウを表示
 	ShowWindow(hWnd, nCmdShow);
 
-	CoInitializeEx(nullptr, 0);
+	
 	//Direct3D初期化
 	Direct3D::Initialize(winW, winH, hWnd);
 
@@ -111,7 +111,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 	
 
-	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (EFK_CHAR *)L"Laser01.efkefc");
+	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"Laser01_reload.efkefc");
 
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
@@ -132,8 +132,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 			Direct3D::BeginDraw();
 
 			//ここに自前の描画処理を追加していく
-			q->DropShadow();
-			q->Draw();
+			//q->DropShadow();
+			//q->Draw();
 			
 			{
 				// Specify a position of view
@@ -143,12 +143,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 				// Specify a projection matrix
 				// 投影行列を設定
 				::Effekseer::Matrix44 projectionMatrix;
-				projectionMatrix.PerspectiveFovLH(90.0f / 180.0f * 3.14f, (float)winW/ (float)winH, 1.0f, 500.0f);
+				projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)winW/ (float)winH, 1.0f, 500.0f);
 
 				// Specify a camera matrix
 				// カメラ行列を設定
 				::Effekseer::Matrix44 cameraMatrix;
-				cameraMatrix.LookAtLH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
+				cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
 				static int32_t time = 0;
 				Effekseer::Handle efkHandle = 0;
 				if (time % 120 == 0)
@@ -179,7 +179,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 				// マネージャーの更新
 				Effekseer::Manager::UpdateParameter updateParameter;
 				Direct3D::gManager->Update(updateParameter);
-
+				
 				// Update a time
 				// 時間を更新する
 				Direct3D::gRenderer->SetTime(time / 60.0f);
@@ -200,7 +200,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 				// エフェクトの描画を行う。
 				Effekseer::Manager::DrawParameter drawParameter;
 				drawParameter.ZNear = 0.0f;
-				drawParameter.ZFar = 1000.0f;
+				drawParameter.ZFar = 1.0f;
 				drawParameter.ViewProjectionMatrix = Direct3D::gRenderer->GetCameraProjectionMatrix();
 				Direct3D::gManager->Draw(drawParameter);
 

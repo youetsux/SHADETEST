@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;D:\Youetsu\EffekseerForCpp170e\install_msvc2022_x64\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;D:\Youetsu\EffekseerForCpp170e\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
+    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
+    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

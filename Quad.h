@@ -13,7 +13,7 @@ typedef struct _vertexPositionColor
 struct CONSTANT_BUFFER
 {
 	XMMATRIX	matWVP;
-	int		isShadow;
+	int			isShadow;
 };
 
 class Quad

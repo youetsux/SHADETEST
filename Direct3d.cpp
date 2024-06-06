@@ -54,6 +54,10 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	//バックバッファの使い道＝画面に描画するために
 	scDesc.SampleDesc.Count = 1;		//MSAA（アンチエイリアス）の設定
 	scDesc.SampleDesc.Quality = 0;		//　〃
+	scDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	scDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	scDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	scDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
 
 	////////////////上記設定をもとにデバイス、コンテキスト、スワップチェインを作成////////////////////////
@@ -114,6 +118,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	txDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	txDesc.SampleDesc.Count = 1;
 	txDesc.SampleDesc.Quality = 0;
+	txDesc.SampleDesc = scDesc.SampleDesc;
 	txDesc.Usage = D3D11_USAGE_DEFAULT;
 	txDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	txDesc.CPUAccessFlags = 0;
@@ -125,35 +130,36 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsDesc;
 	ZeroMemory(&dsDesc, sizeof(dsDesc));
 	dsDesc.Format = txDesc.Format;
-	dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 	dsDesc.Texture2D.MipSlice = 0;
 	hr = pDevice->CreateDepthStencilView(m_pDepthStencilTexture.Get(), &dsDesc, pDepthStencilView.GetAddressOf());
 	if (FAILED(hr))
 		return hr;
+	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());
 
 
 
-	// RenderTarget0へのAlphaブレンド描画設定
-	D3D11_BLEND_DESC BlendState;
-	ZeroMemory(&BlendState, sizeof(D3D11_BLEND_DESC));
-	BlendState.AlphaToCoverageEnable = FALSE;
-	BlendState.IndependentBlendEnable = FALSE;
-	BlendState.RenderTarget[0].BlendEnable = TRUE;
-	BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	hr = pDevice->CreateBlendState(&BlendState, pBlendState.GetAddressOf());
-	if (FAILED(hr)) {
-		MessageBox(NULL, L"ブレンドステートが生成できません", L"エラー", MB_OK);
-		return hr;
-	}
+	//// RenderTarget0へのAlphaブレンド描画設定
+	//D3D11_BLEND_DESC BlendState;
+	//ZeroMemory(&BlendState, sizeof(D3D11_BLEND_DESC));
+	//BlendState.AlphaToCoverageEnable = FALSE;
+	//BlendState.IndependentBlendEnable = FALSE;
+	//BlendState.RenderTarget[0].BlendEnable = TRUE;
+	//BlendState.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	//BlendState.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	//BlendState.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	//BlendState.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	//BlendState.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	//BlendState.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	//BlendState.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	//hr = pDevice->CreateBlendState(&BlendState, pBlendState.GetAddressOf());
+	//if (FAILED(hr)) {
+	//	MessageBox(NULL, L"ブレンドステートが生成できません", L"エラー", MB_OK);
+	//	return hr;
+	//}
 
-	FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
-	pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
+	//FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
+	//pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
 
 
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
@@ -165,11 +171,12 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	vp.MaxDepth = 1.0f;	//奥
 	vp.TopLeftX = 0;	//左
 	vp.TopLeftY = 0;	//上
+	pContext->RSSetViewports(1, &vp);
 
 	//データを画面に描画するための一通りの設定（パイプライン）
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // データの入力種類を指定
-	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
-	pContext->RSSetViewports(1, &vp);
+	//pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
+	
 
 	
 
@@ -262,8 +269,9 @@ void Direct3D::BeginDraw()
 	//画面をクリア
 	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
 
-	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());
-	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
+	//pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());
+	//pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
+
 	pContext->ClearDepthStencilView(pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
@@ -274,7 +282,7 @@ void Direct3D::BeginDraw()
 void Direct3D::EndDraw()
 {
 	//スワップ（バックバッファを表に表示する）
-	pSwapChain->Present(0, 0);
+	pSwapChain->Present(1, 0);
 }
 
 
