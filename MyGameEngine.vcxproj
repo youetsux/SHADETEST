@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;D:\Youetsu\EffekseerForCpp170e\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
-    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
+    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(ProjectDir)install_msvc2022_x64\include\Effekseer;$(ProjectDir)EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
@@ -113,10 +113,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>D:\Youe2\PROJECTS\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\Youe2\PROJECTS\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)install_msvc2022_x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
