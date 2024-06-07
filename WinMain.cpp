@@ -111,7 +111,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 	
 
-	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"Laser01_reload.efkefc");
+	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"magic.efk");
 
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
@@ -138,12 +138,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 			{
 				// Specify a position of view
 				// 視点位置を確定
-				auto viewerPosition = ::Effekseer::Vector3D(10.0f, 5.0f, 20.0f);
+				auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
 
 				// Specify a projection matrix
 				// 投影行列を設定
 				::Effekseer::Matrix44 projectionMatrix;
 				projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)winW/ (float)winH, 1.0f, 500.0f);
+				
 
 				// Specify a camera matrix
 				// カメラ行列を設定
@@ -167,7 +168,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 
 				// Move the effect
 				// エフェクトの移動
-				Direct3D::gManager->AddLocation(efkHandle, ::Effekseer::Vector3D(0.2f, 0.0f, 0.0f));
+				Direct3D::gManager->AddLocation(efkHandle, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f));
 
 				// Set layer parameters
 				// レイヤーパラメータの設定

@@ -19,13 +19,13 @@ namespace EFK
 {
 	ManagerRef gManager;
 	EffekseerRendererDX11::RendererRef gRenderer;
-	std::map<const char16_t*, EffectRef> gEffectList;
+	std::map<std::wstring, EffectRef> gEffectList;
 	float gEFKTimer = 0;
-	Matrix44 CnvMat(DirectX::XMMATRIX mat);
+	Matrix44 CnvMat(DirectX::XMFLOAT4X4 mat);
 }
 
 
-void Efk::Init()
+void EFK::Init()
 {
 	EFK::gManager = Manager::Create(1024);
 	auto grpDevice = EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
@@ -46,11 +46,11 @@ void Efk::Init()
 	EFK::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 }
 
-void Efk::Release()
+void EFK::Release()
 {
 }
 
-void Efk::Update()
+void EFK::Update()
 {
 	float tick = 1 / 60.0f;
 	EFK::gRenderer->SetTime(EFK::gEFKTimer += tick);
@@ -58,38 +58,72 @@ void Efk::Update()
 	EFK::gManager->Update(updateParameter);
 }
 
-void Efk::Draw()
+void EFK::Draw()
 {
-	//g_efkRender->SetProjectionMatrix(GetMat(CameraBase::GetPrimary()->GetProj()));
-	//g_efkRender->SetCameraMatrix(GetMat(CameraBase::GetPrimary()->GetView()));
+	auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
+	Effekseer::Matrix44 projectionMatrix;
+	projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)800 / (float)600, 1.0f, 500.0f);
 
-	//g_efkRender->BeginRendering();
 
-	//// Render effects
-	//// エフェクトの描画を行う。
-	//Effekseer::Manager::DrawParameter drawParameter;
-	//drawParameter.ZNear = 0.0f;
-	//drawParameter.ZFar = 1;
-	//drawParameter.ViewProjectionMatrix = g_efkRender->GetCameraProjectionMatrix();
-	//g_efkManager->Draw(drawParameter);
+	//// Specify a camera matrix
+	//// カメラ行列を設定
+	Effekseer::Matrix44 cameraMatrix;
+	cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
+	gRenderer->SetProjectionMatrix(projectionMatrix);
+	gRenderer->SetCameraMatrix(cameraMatrix);
 
-	//// Finish to rendering effects
-	//// エフェクトの描画終了処理を行う。
-	//g_efkRender->EndRendering();
+	gRenderer->BeginRendering();
+
+	// Render effects
+	// エフェクトの描画を行う。
+	Effekseer::Manager::DrawParameter drawParameter;
+	drawParameter.ZNear = 0.0f;
+	drawParameter.ZFar = 1;
+	drawParameter.ViewProjectionMatrix = gRenderer->GetCameraProjectionMatrix();
+	gManager->Draw(drawParameter);
+
+	// Finish to rendering effects
+	// エフェクトの描画終了処理を行う。
+	gRenderer->EndRendering();
 }
 
-Effekseer::Handle Efk::Play(const char16_t* path, float x, float y, float z)
+Effekseer::Handle EFK::Play(std::wstring path, float x, float y, float z)
 {
-	return Effekseer::Handle();
+	if (EFK::gEffectList.count(path) == 0)
+	{
+		EFK::gEffectList[path] = Effect::Create(EFK::gManager, (const EFK_CHAR *)path.c_str());
+	}
+	auto ret = EFK::gManager->Play(EFK::gEffectList[path], x, y, z);
+	return ret;
 }
 
-Effekseer::Handle Efk::Stop(Effekseer::Handle h)
+Effekseer::Handle EFK::Stop(Effekseer::Handle h)
 {
-	return Effekseer::Handle();
+	gManager->StopEffect(h);
+	return -1;
 }
 
 
-Matrix44 EFK::CnvMat(DirectX::XMMATRIX mat)
+Matrix44 EFK::CnvMat(DirectX::XMFLOAT4X4 mat)
 {
-	return Matrix44();
+	Matrix44 out;
+
+	
+	out.Values[0][0] = mat._11;
+	out.Values[1][0] = mat._12;
+	out.Values[2][0] = mat._13;
+	out.Values[3][0] = mat._14;
+	out.Values[0][1] = mat._21;
+	out.Values[1][1] = mat._22;
+	out.Values[2][1] = mat._23;
+	out.Values[3][1] = mat._24;
+	out.Values[0][2] = mat._31;
+	out.Values[1][2] = mat._32;
+	out.Values[2][2] = mat._33;
+	out.Values[3][2] = mat._34;
+	out.Values[0][3] = mat._41;
+	out.Values[1][3] = mat._42;
+	out.Values[2][3] = mat._43;
+	out.Values[3][3] = mat._44;
+	return out;
 }
