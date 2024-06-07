@@ -64,9 +64,8 @@ void EFK::Draw()
 	Effekseer::Matrix44 projectionMatrix;
 	projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)800 / (float)600, 1.0f, 500.0f);
 
-
-	//// Specify a camera matrix
-	//// カメラ行列を設定
+	// Specify a camera matrix
+	// カメラ行列を設定
 	Effekseer::Matrix44 cameraMatrix;
 	cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
 	gRenderer->SetProjectionMatrix(projectionMatrix);
