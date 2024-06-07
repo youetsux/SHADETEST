@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;D:\Youetsu\EffekseerForCpp170e\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
-    <IncludePath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\Effekseer;D:\プロジェクト\EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(ProjectDir)install_msvc2022_x64\include\Effekseer;$(ProjectDir)EffekseeLib\install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)install_msvc2022_x64\include\Effekseer;$(ProjectDir)install_msvc2022_x64\include\EffekseerRendererDX11;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>D:\プロジェクト\EffekseeLib\install_msvc2022_x64\lib;$(LibraryPath);D:\Youetsu\VSPROJECT\EffekseeLib\install_msvc2022_x64\lib</LibraryPath>
