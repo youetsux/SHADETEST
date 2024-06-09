@@ -136,7 +136,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	if (FAILED(hr))
 		return hr;
 	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());
-
+	
 
 
 	//// RenderTarget0へのAlphaブレンド描画設定
@@ -238,7 +238,7 @@ HRESULT Direct3D::InitShader()
 
 	//ラスタライザ作成
 	D3D11_RASTERIZER_DESC rdc = {};
-	rdc.CullMode = D3D11_CULL_NONE;  //多角形の裏側は描画しない（カリング）
+	rdc.CullMode = D3D11_CULL_BACK;  //多角形の裏側は描画しない（カリング）
 	rdc.FillMode = D3D11_FILL_SOLID; //多角形の内部を塗りつぶす
 	rdc.FrontCounterClockwise = FALSE; //反時計回りを表にするかどうか（がfalseなので時計回りが表）
 	hr = pDevice->CreateRasterizerState(&rdc, pRasterizerState.GetAddressOf());
@@ -265,8 +265,10 @@ void Direct3D::BeginDraw()
 {
 	//背景の色
 	//float clearColor[4] = { 255/255.0f, 250/255.0f, 205/255.0f, 1.0f };//R,G,B,A
-	float clearColor[4] = {0,0,0, 1.0f };//R,G,B,A
-
+	//float clearColor[4] = {0,0,0, 1.0f };//R,G,B,A
+	float clearColor[4] = { 0.4,0.2,0.4, 1.0f };//R,G,B,A
+	
+	
 	//画面をクリア
 	pContext->ClearRenderTargetView(pRenderTargetView.Get(), clearColor);
 

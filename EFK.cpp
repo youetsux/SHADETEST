@@ -54,7 +54,9 @@ void EFK::Update()
 {
 	float tick = 1 / 60.0f;
 	EFK::gRenderer->SetTime(EFK::gEFKTimer += tick);
+	
 	Manager::UpdateParameter updateParameter;
+	
 	EFK::gManager->Update(updateParameter);
 }
 
@@ -76,6 +78,7 @@ void EFK::Draw()
 	// Render effects
 	// エフェクトの描画を行う。
 	Effekseer::Manager::DrawParameter drawParameter;
+	
 	drawParameter.ZNear = 0.0f;
 	drawParameter.ZFar = 1;
 	drawParameter.ViewProjectionMatrix = gRenderer->GetCameraProjectionMatrix();
