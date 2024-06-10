@@ -20,11 +20,6 @@ namespace Direct3D
 	ComPtr<ID3D11RasterizerState> pRasterizerState = nullptr;	//ラスタライザー
 	ComPtr<ID3D11BlendState> pBlendState = nullptr;
 	
-	::EffekseerRendererDX11::RendererRef gRenderer;
-	::Effekseer::ManagerRef gManager;
-	::Effekseer::EffectRef gEffect;
-	::Effekseer::Backend::GraphicsDeviceRef gEFDev;
-
 }
 
 //初期化

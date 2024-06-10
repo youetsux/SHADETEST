@@ -1,7 +1,9 @@
 #include "EFK.h"
-#include "Direct3D.h"
 #include <EffekseerRendererDX11.h>
+
+#include "Direct3D.h"
 #include <map>
+
 
 
 #ifdef _DEBUG
@@ -17,6 +19,7 @@ using namespace Effekseer;
 
 namespace EFK
 {
+
 	ManagerRef gManager;
 	EffekseerRendererDX11::RendererRef gRenderer;
 	std::map<std::wstring, EffectRef> gEffectList;
@@ -27,23 +30,23 @@ namespace EFK
 
 void EFK::Init()
 {
-	EFK::gManager = Manager::Create(1024);
+	gManager = Manager::Create(1024);
 	auto grpDevice = EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
-	EFK::gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 1024);
-	EFK::gManager->SetSpriteRenderer(EFK::gRenderer->CreateSpriteRenderer());
-	EFK::gManager->SetRibbonRenderer(EFK::gRenderer->CreateRibbonRenderer());
-	EFK::gManager->SetRingRenderer(EFK::gRenderer->CreateRingRenderer());
-	EFK::gManager->SetTrackRenderer(EFK::gRenderer->CreateTrackRenderer());
-	EFK::gManager->SetModelRenderer(EFK::gRenderer->CreateModelRenderer());
+	gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 1024);
+	gManager->SetSpriteRenderer(gRenderer->CreateSpriteRenderer());
+	gManager->SetRibbonRenderer(gRenderer->CreateRibbonRenderer());
+	gManager->SetRingRenderer(gRenderer->CreateRingRenderer());
+	gManager->SetTrackRenderer(gRenderer->CreateTrackRenderer());
+	gManager->SetModelRenderer(gRenderer->CreateModelRenderer());
 
 	// Specify a texture, model, curve and material loader
 	// It can be extended by yourself. It is loaded from a file on now.
 	// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
 	// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
-	EFK::gManager->SetTextureLoader(EFK::gRenderer->CreateTextureLoader());
-	EFK::gManager->SetModelLoader(EFK::gRenderer->CreateModelLoader());
-	EFK::gManager->SetMaterialLoader(EFK::gRenderer->CreateMaterialLoader());
-	EFK::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
+	gManager->SetTextureLoader(gRenderer->CreateTextureLoader());
+	gManager->SetModelLoader(gRenderer->CreateModelLoader());
+	gManager->SetMaterialLoader(gRenderer->CreateMaterialLoader());
+	gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 }
 
 void EFK::Release()
@@ -53,18 +56,18 @@ void EFK::Release()
 void EFK::Update()
 {
 	float tick = 1 / 60.0f;
-	EFK::gRenderer->SetTime(EFK::gEFKTimer += tick);
+	gRenderer->SetTime(gEFKTimer += tick);
 	
 	Manager::UpdateParameter updateParameter;
 	
-	EFK::gManager->Update(updateParameter);
+	gManager->Update(updateParameter);
 }
 
 void EFK::Draw()
 {
 	auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
 	Effekseer::Matrix44 projectionMatrix;
-	projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)800 / (float)600, 1.0f, 500.0f);
+	projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)800 / (float)600, 0.1f, 500.0f);
 
 	// Specify a camera matrix
 	// カメラ行列を設定
@@ -91,11 +94,11 @@ void EFK::Draw()
 
 Effekseer::Handle EFK::Play(std::wstring path, float x, float y, float z)
 {
-	if (EFK::gEffectList.count(path) == 0)
+	if (gEffectList.count(path) == 0)
 	{
-		EFK::gEffectList[path] = Effect::Create(EFK::gManager, (const EFK_CHAR *)path.c_str());
+		gEffectList[path] = Effect::Create(gManager, (const EFK_CHAR *)path.c_str());
 	}
-	auto ret = EFK::gManager->Play(EFK::gEffectList[path], x, y, z);
+	auto ret = gManager->Play(gEffectList[path], x, y, z);
 	return ret;
 }
 
