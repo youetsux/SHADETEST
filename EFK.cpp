@@ -75,13 +75,16 @@ void EFK::Draw()
 	cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
 	gRenderer->SetProjectionMatrix(projectionMatrix);
 	gRenderer->SetCameraMatrix(cameraMatrix);
+	
+	Effekseer::RenderMode mode;
+	
+	gRenderer->SetRenderMode()
 
 	gRenderer->BeginRendering();
 
 	// Render effects
-	// エフェクトの描画を行う。
+// エフェクトの描画を行う。
 	Effekseer::Manager::DrawParameter drawParameter;
-	
 	drawParameter.ZNear = 0.0f;
 	drawParameter.ZFar = 1;
 	drawParameter.ViewProjectionMatrix = gRenderer->GetCameraProjectionMatrix();
@@ -99,6 +102,8 @@ Effekseer::Handle EFK::Play(std::wstring path, float x, float y, float z)
 		gEffectList[path] = Effect::Create(gManager, (const EFK_CHAR *)path.c_str());
 	}
 	auto ret = gManager->Play(gEffectList[path], x, y, z);
+	auto setting = gManager->GetSetting();
+	
 	return ret;
 }
 

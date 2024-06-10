@@ -2,11 +2,13 @@
 #include <string>
 #include <DirectXMath.h>
 #include <Effekseer.h>
-
+#include <EffekseerRendererDX11.h>
 
 
 namespace EFK
 {
+	extern Effekseer::ManagerRef gManager;
+	extern EffekseerRendererDX11::RendererRef gRenderer;
 	void Init();
 	void Release();
 	void Update();

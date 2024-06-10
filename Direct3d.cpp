@@ -261,7 +261,7 @@ void Direct3D::BeginDraw()
 	//”wŒi‚ÌF
 	//float clearColor[4] = { 255/255.0f, 250/255.0f, 205/255.0f, 1.0f };//R,G,B,A
 	//float clearColor[4] = {0,0,0, 1.0f };//R,G,B,A
-	float clearColor[4] = { 0.4,0.2,0.4, 1.0f };//R,G,B,A
+	float clearColor[4] = { 0.1,0.1,0.2, 1.0f };//R,G,B,A
 	
 	
 	//‰æ–Ê‚ğƒNƒŠƒA

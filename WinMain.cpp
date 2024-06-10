@@ -134,93 +134,47 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		//メッセージなし
 		else
 		{
+			static int time = 0;
+			Direct3D::BeginDraw();
 			//ゲームの処理
 			EFK::Update();
-			EFK::Draw();
 
-			Direct3D::BeginDraw();
+			EFK::gRenderer->SetTime(time / 60.0f);
 			
-			//{
-			//	// Specify a position of view
-			//	// 視点位置を確定
-			//	auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
-			//	// Specify a projection matrix
-			//	// 投影行列を設定
-			//	::Effekseer::Matrix44 projectionMatrix;
-			//	projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)winW/ (float)winH, 0.01f, 1000.0f);
-			//	
-			//	// Specify a camera matrix
-			//	// カメラ行列を設定
-			//	::Effekseer::Matrix44 cameraMatrix;
-			//	cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
-			//	static int32_t time = 0;
-			//	Effekseer::Handle efkHandle = 0;
-			//	if (time % 120 == 0)
-			//	{
-			//		// Play an effect
-			//		// エフェクトの再生
-			//		efkHandle = Direct3D::gManager->Play(Direct3D::gEffect, 0, -2, 0);
-			//	}
-			//	if (time % 120 == 119)
-			//	{
-			//		// Stop effects
-			//		// エフェクトの停止
-			//		Direct3D::gManager->StopEffect(efkHandle);
-			//	}
-			//	// Move the effect
-			//	// エフェクトの移動
-			//	Direct3D::gManager->AddLocation(efkHandle, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f));
-			//	// Set layer parameters
-			//	// レイヤーパラメータの設定
-			//	Effekseer::Manager::LayerParameter layerParameter;
-			//	layerParameter.ViewerPosition = viewerPosition;
-			//	Direct3D::gManager->SetLayerParameter(0, layerParameter);
-			//	
-			//	// Update the manager
-			//	// マネージャーの更新
-			//	Effekseer::Manager::UpdateParameter updateParameter;
-			//	
-			//	Direct3D::gManager->Update(updateParameter);
-			//	
-			//	
-			//	// Update a time
-			//	// 時間を更新する
-			//	Direct3D::gRenderer->SetTime(time / 60.0f);
-			//	// Specify a projection matrix
-			//	// 投影行列を設定
-			//	Direct3D::gRenderer->SetProjectionMatrix(projectionMatrix);
-			//	// Specify a camera matrix
-			//	// カメラ行列を設定
-			//	Direct3D::gRenderer->SetCameraMatrix(cameraMatrix);
-			//	// Begin to rendering effects
-			//	// エフェクトの描画開始処理を行う。
-			//	Direct3D::gRenderer->BeginRendering();
-			//	//Direct3D::BeginDraw();
-			//	// Render effects
-			//	// エフェクトの描画を行う。
-			//	Effekseer::Manager::DrawParameter drawParameter;
-			//	drawParameter.CameraFrontDirection = { 0,0,1 };
-			//	drawParameter.ZNear = 0.0f;
-			//	drawParameter.ZFar = 1.0f;
-			//	drawParameter.ViewProjectionMatrix = Direct3D::gRenderer->GetCameraProjectionMatrix();
-		//	
-			//	Direct3D::gManager->Draw(drawParameter);
-			//	// Finish to rendering effects
-			//	// エフェクトの描画終了処理を行う。
-			//	Direct3D::gRenderer->EndRendering();
-			//	time++;
-			//}
+
+			Effekseer::Handle handle  = -1;
+			if (time % 60 == 0)
+			{
+				// Play an effect
+				// エフェクトの再生
+				handle = EFK::gManager->Play(EFK::gEffectList[L"magic.efk"], 0, 0, 0);
+			}
+
+			if (time % 240 == 239)
+			{
+				// Stop effects
+				// エフェクトの停止
+				//if(handle >= 0)
+				//	EFK::gManager->StopEffect(handle);
+			}
+			q->Draw();
+			EFK::Draw();
+			
+			//Direct3D::BeginDraw();
+			
+
 			//Direct3D::BeginDraw();
 			//ここに自前の描画処理を追加していく
 			//Direct3D::EndDraw();
 			//描画処理
 	
-			q->DropShadow();
-			q->Draw();
-			
+			//q->DropShadow();
+			//q->Draw();
+			//
 
 			Direct3D::EndDraw();
-			
+
+			time++;
 		}
 		
 	}
@@ -228,8 +182,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	Direct3D::Release();
 	
 	//Direct3D::gEffect->Release();
-	////Direct3D::gManager->Release();
-	//Direct3D::gRenderer->Release();
+	//EFK::gManager->Release();
+	//EFK::gRenderer->Release();
 	//Direct3D::gEFDev->Release();
 
 	return 0;
