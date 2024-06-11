@@ -86,35 +86,36 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	q->Initialize();
 
 
-	Direct3D::gManager = ::Effekseer::Manager::Create(8000);
 
-	// Setup effekseer modules
-	// Effekseerのモジュールをセットアップする
-	Direct3D::gEFDev = ::EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
-
-	// Create a renderer of effects
-	// エフェクトのレンダラーの作成
-	Direct3D::gRenderer = ::EffekseerRendererDX11::Renderer::Create(Direct3D::gEFDev, 8000);
-
-	// Sprcify rendering modules
-	// 描画モジュールの設定
-	Direct3D::gManager->SetSpriteRenderer(Direct3D::gRenderer->CreateSpriteRenderer());
-	Direct3D::gManager->SetRibbonRenderer(Direct3D::gRenderer->CreateRibbonRenderer());
-	Direct3D::gManager->SetRingRenderer(Direct3D::gRenderer->CreateRingRenderer());
-	Direct3D::gManager->SetTrackRenderer(Direct3D::gRenderer->CreateTrackRenderer());
-	Direct3D::gManager->SetModelRenderer(Direct3D::gRenderer->CreateModelRenderer());
-
-	// Specify a texture, model, curve and material loader
-	// It can be extended by yourself. It is loaded from a file on now.
-	// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
-	// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
-	Direct3D::gManager->SetTextureLoader(Direct3D::gRenderer->CreateTextureLoader());
-	Direct3D::gManager->SetModelLoader(Direct3D::gRenderer->CreateModelLoader());
-	Direct3D::gManager->SetMaterialLoader(Direct3D::gRenderer->CreateMaterialLoader());
-	Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
+	//Direct3D::gManager = ::Effekseer::Manager::Create(8000);
+	//// Setup effekseer modules
+	//// Effekseerのモジュールをセットアップする
+	//Direct3D::gEFDev = ::EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
+	//// Create a renderer of effects
+	//// エフェクトのレンダラーの作成
+	//Direct3D::gRenderer = ::EffekseerRendererDX11::Renderer::Create(Direct3D::gEFDev, 8000);
+	//
+	//// Sprcify rendering modules
+	//// 描画モジュールの設定
+	//Direct3D::gManager->SetSpriteRenderer(Direct3D::gRenderer->CreateSpriteRenderer());
+	//Direct3D::gManager->SetRibbonRenderer(Direct3D::gRenderer->CreateRibbonRenderer());
+	//Direct3D::gManager->SetRingRenderer(Direct3D::gRenderer->CreateRingRenderer());
+	//Direct3D::gManager->SetTrackRenderer(Direct3D::gRenderer->CreateTrackRenderer());
+	//Direct3D::gManager->SetModelRenderer(Direct3D::gRenderer->CreateModelRenderer());
+	//// Specify a texture, model, curve and material loader
+	//// It can be extended by yourself. It is loaded from a file on now.
+	//// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
+	//// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
+	//Direct3D::gManager->SetTextureLoader(Direct3D::gRenderer->CreateTextureLoader());
+	//Direct3D::gManager->SetModelLoader(Direct3D::gRenderer->CreateModelLoader());
+	//Direct3D::gManager->SetMaterialLoader(Direct3D::gRenderer->CreateMaterialLoader());
+	//Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 	
+	EFK::Play(L"magic.efk", 0, 0, 0);
 
-	Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"magic.efk");
+	//Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"magic.efk");
+
+
 
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
