@@ -1,5 +1,5 @@
 #include "Quad.h"
-
+#include "Camera.h"
 
 
 Quad::Quad()
@@ -98,10 +98,10 @@ void Quad::Initialize()
 void Quad::Draw()
 {
 	//コンスタントバッファに渡す情報
-	XMVECTOR position = { 0, 5, -5, 0 };	//カメラの位置
-	XMVECTOR target = { 0, 0, 0, 0 };	//カメラの焦点
-	XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
-	XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
+	//XMVECTOR position = { 0, 5, -5, 0 };	//カメラの位置
+	//XMVECTOR target = { 0, 0, 0, 0 };	//カメラの焦点
+	//XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
+	//XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
 
 	static float angleRadians = 0;
 	const auto DELTA = DirectX::XMConvertToRadians(0.1f);
@@ -113,9 +113,8 @@ void Quad::Draw()
 	// XMMATRIX型からXMFloat4x4型にStoreする
 	//DirectX::XMStoreFloat4x4(&m_constant->Buffer.Model, m);
 
-
 	CONSTANT_BUFFER cb;
-	cb.matWVP = XMMatrixTranspose(m*view* proj);
+	cb.matWVP = XMMatrixTranspose(m * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.isShadow = 0;
 
 	D3D11_MAPPED_SUBRESOURCE pdata;

@@ -4,6 +4,7 @@
 #include <string>
 #include "StringToWideStringConverter.h"
 #include "Quad.h"
+#include "Camera.h"
 
 //ƒŠƒ“ƒJ
 #pragma comment(lib, "d3d11.lib")
@@ -77,6 +78,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	
 	//Direct3D‰Šú‰»
 	Direct3D::Initialize(winW, winH, hWnd);
+
+	Camera::Initialize({ 0,5,-5 }, { 0,0,0 });
 
 	Quad* q;
 	q = new Quad();
