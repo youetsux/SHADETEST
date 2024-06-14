@@ -31,25 +31,28 @@ namespace EFK
 
 void EFK::Init()
 {
-	gManager = Manager::Create(1024);
-	gManager->SetCoordinateSystem(CoordinateSystem::LH);
-	
+	gManager = Manager::Create(8000);
 
-	auto grpDevice = EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
-	gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 1024);
-	gManager->SetSpriteRenderer(EFK::gRenderer->CreateSpriteRenderer());
-	gManager->SetRibbonRenderer(EFK::gRenderer->CreateRibbonRenderer());
-	gManager->SetRingRenderer(EFK::gRenderer->CreateRingRenderer());
-	gManager->SetTrackRenderer(EFK::gRenderer->CreateTrackRenderer());
-	gManager->SetModelRenderer(EFK::gRenderer->CreateModelRenderer());
+	gEFKTimer = 0;
+
+	::Effekseer::Backend::GraphicsDeviceRef grpDevice;
+	grpDevice = EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
+	gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 8000);
+
+	gManager->SetCoordinateSystem(CoordinateSystem::LH);
+	gManager->SetSpriteRenderer(gRenderer->CreateSpriteRenderer());
+	gManager->SetRibbonRenderer(gRenderer->CreateRibbonRenderer());
+	gManager->SetRingRenderer(gRenderer->CreateRingRenderer());
+	gManager->SetTrackRenderer(gRenderer->CreateTrackRenderer());
+	gManager->SetModelRenderer(gRenderer->CreateModelRenderer());
 
 	// Specify a texture, model, curve and material loader
 	// It can be extended by yourself. It is loaded from a file on now.
 	// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
-	// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
-	gManager->SetTextureLoader(EFK::gRenderer->CreateTextureLoader());
-	gManager->SetModelLoader(EFK::gRenderer->CreateModelLoader());
-	gManager->SetMaterialLoader(EFK::gRenderer->CreateMaterialLoader());
+	// ユーザーが独自で拡張でき。現在はファイルから読み込んでいる。
+	gManager->SetTextureLoader(gRenderer->CreateTextureLoader());
+	gManager->SetModelLoader(gRenderer->CreateModelLoader());
+	gManager->SetMaterialLoader(gRenderer->CreateMaterialLoader());
 	gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 }
 
@@ -60,50 +63,33 @@ void EFK::Release()
 void EFK::Update()
 {
 	float tick = 1 / 60.0f;
-	EFK::gRenderer->SetTime(EFK::gEFKTimer += tick);
+	static int timer = 0;
+	Effekseer::Handle efkHandle = 0;
+	EFK::gRenderer->SetTime(gEFKTimer += tick);
+
+	if (timer%120 == 0 )
+	{
+		Effekseer::EffectRef ref = gEffectList["mahoujin.efkefc"];
+		efkHandle = gManager->Play(ref, 0, 0, 0);
+	}
+	if (timer % 120 == 119)
+	{
+		gManager->StopEffect(efkHandle);
+	}
+	
+
 	Manager::UpdateParameter updateParameter;
-	EFK::gManager->Update(updateParameter);
+	gManager->Update(updateParameter);
+	
+	timer++;
 }
 
 void EFK::Draw()
 {
-	//XMFLOAT4X4 proj;
-	//XMStoreFloat4x4(&proj, EFK::GetProjMat(true));
-	//XMFLOAT4X4 view;
-	//XMStoreFloat4x4(&view, EFK::GetViewMat(false));
 
-	//auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
-	////	// Specify a projection matrix
-	////	// 投影行列を設定
-	//::Effekseer::Matrix44 projectionMatrix;
-	//projectionMatrix.PerspectiveFovLH(90.0f / 180.0f * 3.14f, (float)800/ (float)600, 1.0f, 500.0f);
-	////	
-	//// Specify a camera matrix
-	//// カメラ行列を設定
-	//::Effekseer::Matrix44 cameraMatrix;
-	//cameraMatrix.LookAtLH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
+	gRenderer->SetProjectionMatrix(CnvMat(GetProjMat(true)));
+	gRenderer->SetCameraMatrix(CnvMat(GetViewMat(true)));
 
-
-	// EffekseerのCameraMatrixは、カメラの姿勢行列の逆行列を指す。カメラ行列がカメラの姿勢行列である場合は、逆行列化しておく。
-	//auto invAppCameraMatrix = XMMatrixInverse(nullptr, EFK::GetViewMat(true));
-	//XMFLOAT4X4 view;
-	//XMStoreFloat4x4(&view, invAppCameraMatrix);
-
-
-	// アプリケーションとEffekseerの、投影(射影)行列とカメラ行列を同期
-	//for (int i = 0; i < 4; ++i)
-	//{
-	//	for (int j = 0; j < 4; ++j)
-	//	{
-	//		projectionMatrix.Values[i][j] = appProjectionMatrix.m[i][j];
-	//		cameraMatrix.Values[i][j] = invAppCameraMatrix.m[i][j];
-	//	}
-	//}
-
-	gRenderer->SetProjectionMatrix(CnvMat(EFK::GetProjMat(true)));
-	gRenderer->SetCameraMatrix(CnvMat(EFK::GetViewMat(true)));
-	//gRenderer->SetProjectionMatrix(projectionMatrix);
-	//gRenderer->SetCameraMatrix(cameraMatrix);
 
 	gRenderer->BeginRendering();
 
@@ -118,27 +104,6 @@ void EFK::Draw()
 	// Finish to rendering effects
 	// エフェクトの描画終了処理を行う。
 	gRenderer->EndRendering();
-
-	//auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
-	//Effekseer::Matrix44 projectionMatrix;
-	//projectionMatrix.PerspectiveFovRH(90.0f / 180.0f * 3.14f, (float)800 / (float)600, 1.0f, 500.0f);
-	//// Specify a camera matrix
-	//// カメラ行列を設定
-	//Effekseer::Matrix44 cameraMatrix;
-	//cameraMatrix.LookAtRH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
-	//gRenderer->SetProjectionMatrix(projectionMatrix);
-	//gRenderer->SetCameraMatrix(cameraMatrix);
-	//gRenderer->BeginRendering();
-	//// Render effects
-	//// エフェクトの描画を行う。
-	//Effekseer::Manager::DrawParameter drawParameter;
-	//drawParameter.ZNear = 0.0f;
-	//drawParameter.ZFar = 1;
-	//drawParameter.ViewProjectionMatrix = gRenderer->GetCameraProjectionMatrix();
-	//gManager->Draw(drawParameter);
-	//// Finish to rendering effects
-	//// エフェクトの描画終了処理を行う。
-	//gRenderer->EndRendering();
 }
 
 
@@ -190,9 +155,10 @@ Matrix44 EFK::CnvMat(DirectX::XMFLOAT4X4 mat)
 
 DirectX::XMFLOAT4X4 EFK::GetProjMat(bool transpose)
 {
-	DirectX::XMMATRIX mat = DirectX::XMMatrixLookAtLH(
-		Camera::DefCam.position_, Camera::DefCam.target_, Camera::DefCam.upvector_
-	);
+
+	DirectX::XMMATRIX mat = DirectX::XMMatrixPerspectiveFovLH(Camera::DefCam.fov_,
+		Camera::DefCam.aspect_,
+		Camera::DefCam.near_, Camera::DefCam.far_);
 	if (transpose)
 		mat = DirectX::XMMatrixTranspose(mat);
 	DirectX::XMFLOAT4X4 fmat;
@@ -203,9 +169,9 @@ DirectX::XMFLOAT4X4 EFK::GetProjMat(bool transpose)
 
 DirectX::XMFLOAT4X4  EFK::GetViewMat(bool transpose)
 {
-	DirectX::XMMATRIX mat = DirectX::XMMatrixPerspectiveFovLH(Camera::DefCam.fov_,
-															  Camera::DefCam.aspect_, 
-		                                                      Camera::DefCam.near_,Camera::DefCam.far_);
+	DirectX::XMMATRIX mat = DirectX::XMMatrixLookAtLH(
+		Camera::DefCam.position_, Camera::DefCam.target_, Camera::DefCam.upvector_
+	);
 	if (transpose)
 		mat = DirectX::XMMatrixTranspose(mat);
 	DirectX::XMFLOAT4X4 fmat;

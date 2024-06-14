@@ -108,13 +108,15 @@ void Quad::Draw()
 	angleRadians += DELTA;
 	// XMMATRIXŒ^‚Ì’l‚ðì‚éI
 	//auto m = DirectX::XMMatrixIdentity();
+	auto s = DirectX::XMMatrixScaling(0.5, 0.5, 0.5);
+	auto t = DirectX::XMMatrixTranslation(0, 0.2, 0);
 	auto m = DirectX::XMMatrixRotationY(angleRadians);
 
 	// XMMATRIXŒ^‚©‚çXMFloat4x4Œ^‚ÉStore‚·‚é
 	//DirectX::XMStoreFloat4x4(&m_constant->Buffer.Model, m);
 
 	CONSTANT_BUFFER cb;
-	cb.matWVP = XMMatrixTranspose(m * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
+	cb.matWVP = XMMatrixTranspose(s * m * t * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.isShadow = 0;
 
 	D3D11_MAPPED_SUBRESOURCE pdata;

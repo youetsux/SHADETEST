@@ -156,7 +156,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	//FLOAT blendFactor[4] = { D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO, D3D11_BLEND_ZERO };
 	//pContext->OMSetBlendState(pBlendState.Get(), blendFactor, 0xffffffff);
 
-
+	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), pDepthStencilView.Get());            // 描画先を設定
 	///////////////////////////ビューポート（描画範囲）設定///////////////////////////////
 //レンダリング結果を表示する範囲
 	D3D11_VIEWPORT vp;
@@ -170,7 +170,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 	//データを画面に描画するための一通りの設定（パイプライン）
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // データの入力種類を指定
-	//pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);            // 描画先を設定
+
 	
 
 	
@@ -288,6 +288,7 @@ void Direct3D::EndDraw()
 //解放処理
 void Direct3D::Release()
 {
+	CoUninitialize();
 	//解放処理
 
 	//pRasterizerState->Release();
