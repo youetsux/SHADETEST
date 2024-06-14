@@ -24,8 +24,8 @@ namespace EFK
 	std::map<fs::path, EffectRef> gEffectList;
 	float gEFKTimer = 0;
 	Matrix44 CnvMat(DirectX::XMFLOAT4X4 mat);
-	DirectX::XMMATRIX GetProjMat(bool transpose);
-	DirectX::XMMATRIX GetViewMat(bool transpose);
+	DirectX::XMFLOAT4X4 GetProjMat(bool transpose);
+	DirectX::XMFLOAT4X4 GetViewMat(bool transpose);
 }
 
 
@@ -67,10 +67,10 @@ void EFK::Update()
 
 void EFK::Draw()
 {
-	XMFLOAT4X4 proj;
-	XMStoreFloat4x4(&proj,EFK::GetProjMat(false));
-	XMFLOAT4X4 view;
-	XMStoreFloat4x4(&view, EFK::GetViewMat(false));
+	//XMFLOAT4X4 proj;
+	//XMStoreFloat4x4(&proj, EFK::GetProjMat(true));
+	//XMFLOAT4X4 view;
+	//XMStoreFloat4x4(&view, EFK::GetViewMat(false));
 
 	//auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
 	////	// Specify a projection matrix
@@ -83,8 +83,25 @@ void EFK::Draw()
 	//::Effekseer::Matrix44 cameraMatrix;
 	//cameraMatrix.LookAtLH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
 
-	gRenderer->SetProjectionMatrix(CnvMat(proj));
-	gRenderer->SetCameraMatrix(CnvMat(view));
+
+	// EffekseerのCameraMatrixは、カメラの姿勢行列の逆行列を指す。カメラ行列がカメラの姿勢行列である場合は、逆行列化しておく。
+	//auto invAppCameraMatrix = XMMatrixInverse(nullptr, EFK::GetViewMat(true));
+	//XMFLOAT4X4 view;
+	//XMStoreFloat4x4(&view, invAppCameraMatrix);
+
+
+	// アプリケーションとEffekseerの、投影(射影)行列とカメラ行列を同期
+	//for (int i = 0; i < 4; ++i)
+	//{
+	//	for (int j = 0; j < 4; ++j)
+	//	{
+	//		projectionMatrix.Values[i][j] = appProjectionMatrix.m[i][j];
+	//		cameraMatrix.Values[i][j] = invAppCameraMatrix.m[i][j];
+	//	}
+	//}
+
+	gRenderer->SetProjectionMatrix(CnvMat(EFK::GetProjMat(true)));
+	gRenderer->SetCameraMatrix(CnvMat(EFK::GetViewMat(true)));
 	//gRenderer->SetProjectionMatrix(projectionMatrix);
 	//gRenderer->SetCameraMatrix(cameraMatrix);
 
@@ -171,19 +188,27 @@ Matrix44 EFK::CnvMat(DirectX::XMFLOAT4X4 mat)
 	return out;
 }
 
-DirectX::XMMATRIX EFK::GetProjMat(bool transpose)
+DirectX::XMFLOAT4X4 EFK::GetProjMat(bool transpose)
 {
-	DirectX::XMMATRIX mat = Camera::GetProjectionMatrix();
+	DirectX::XMMATRIX mat = DirectX::XMMatrixLookAtLH(
+		Camera::DefCam.position_, Camera::DefCam.target_, Camera::DefCam.upvector_
+	);
 	if (transpose)
 		mat = DirectX::XMMatrixTranspose(mat);
-	return mat;
+	DirectX::XMFLOAT4X4 fmat;
+	DirectX::XMStoreFloat4x4(&fmat, mat);
+	return fmat;
 }
 
-DirectX::XMMATRIX EFK::GetViewMat(bool transpose)
+
+DirectX::XMFLOAT4X4  EFK::GetViewMat(bool transpose)
 {
-	
-	DirectX::XMMATRIX mat = Camera::GetViewMatrix();
+	DirectX::XMMATRIX mat = DirectX::XMMatrixPerspectiveFovLH(Camera::DefCam.fov_,
+															  Camera::DefCam.aspect_, 
+		                                                      Camera::DefCam.near_,Camera::DefCam.far_);
 	if (transpose)
 		mat = DirectX::XMMatrixTranspose(mat);
-	return mat;
+	DirectX::XMFLOAT4X4 fmat;
+	DirectX::XMStoreFloat4x4(&fmat, mat);
+	return fmat;
 }

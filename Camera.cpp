@@ -3,19 +3,7 @@
 
 namespace Camera
 {
-	struct CameraSetting
-	{
-		//変数
-		XMVECTOR position_;	//カメラの位置（視点）
-		XMVECTOR target_;	//見る位置（焦点）
-		XMVECTOR upvector_; //上向きのベクトル
-		float	 fov_;
-		float	 near_;
-		float	 far_;
-		float    aspect_;
-	};
-
-	static CameraSetting DefCam;
+    CameraSetting DefCam;
 	XMMATRIX viewMatrix_;	//ビュー行列
 	XMMATRIX projMatrix_;	//プロジェクション行列
 }

@@ -5,6 +5,18 @@
 
 using namespace DirectX;
 
+struct CameraSetting
+{
+	//変数
+	XMVECTOR position_;	//カメラの位置（視点）
+	XMVECTOR target_;	//見る位置（焦点）
+	XMVECTOR upvector_; //上向きのベクトル
+	float	 fov_;
+	float	 near_;
+	float	 far_;
+	float    aspect_;
+};
+
 //-----------------------------------------------------------
 //カメラ
 //-----------------------------------------------------------
@@ -33,4 +45,5 @@ namespace Camera
 	XMVECTOR GetViewPosition();
 	XMVECTOR GetTarget();
 	XMVECTOR GetUpVector();
+	extern  CameraSetting DefCam;
 };

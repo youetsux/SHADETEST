@@ -80,7 +80,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//Direct3D初期化
 	Direct3D::Initialize(winW, winH, hWnd);
 
-	Camera::Initialize({ 0,5,-5 }, { 0,0,0 });
+	//Camera::Initialize({ 0, 2, 2 }, { 0,0,0 });
+	Camera::Initialize();
 
 	Quad* q;
 	q = new Quad();
@@ -113,12 +114,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//Direct3D::gManager->SetMaterialLoader(Direct3D::gRenderer->CreateMaterialLoader());
 	//Direct3D::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 	
-	EFK::Play(u"magic.efk", 0, 0, 0);
+	
 
 	//Direct3D::gEffect = Effekseer::Effect::Create(Direct3D::gManager, (const EFK_CHAR *)L"magic.efk");
 
 
-
+	EFK::Play(u"magic.efk", 0, 0, 0);
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
@@ -134,12 +135,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		//メッセージなし
 		else
 		{
+
 			//ゲームの処理
 			Direct3D::BeginDraw();
 
 			//ここに自前の描画処理を追加していく
 			//q->DropShadow();
-			//q->Draw();
+			q->Draw();
 			
 			EFK::Update();
 
