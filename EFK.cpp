@@ -2,6 +2,7 @@
 #include "Direct3D.h"
 #include <EffekseerRendererDX11.h>
 #include <map>
+#include <filesystem>
 #include "Camera.h"
 
 
@@ -13,14 +14,14 @@
 #pragma comment(lib, "Effekseer.lib")
 
 #endif
-
+namespace fs = std::filesystem;
 using namespace Effekseer;
 
 namespace EFK
 {
 	ManagerRef gManager;
 	EffekseerRendererDX11::RendererRef gRenderer;
-	std::map<std::wstring, EffectRef> gEffectList;
+	std::map<fs::path, EffectRef> gEffectList;
 	float gEFKTimer = 0;
 	Matrix44 CnvMat(DirectX::XMFLOAT4X4 mat);
 	DirectX::XMMATRIX GetProjMat(bool transpose);
@@ -30,23 +31,26 @@ namespace EFK
 
 void EFK::Init()
 {
-	EFK::gManager = Manager::Create(1024);
+	gManager = Manager::Create(1024);
+	gManager->SetCoordinateSystem(CoordinateSystem::LH);
+	
+
 	auto grpDevice = EffekseerRendererDX11::CreateGraphicsDevice(Direct3D::pDevice.Get(), Direct3D::pContext.Get());
-	EFK::gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 1024);
-	EFK::gManager->SetSpriteRenderer(EFK::gRenderer->CreateSpriteRenderer());
-	EFK::gManager->SetRibbonRenderer(EFK::gRenderer->CreateRibbonRenderer());
-	EFK::gManager->SetRingRenderer(EFK::gRenderer->CreateRingRenderer());
-	EFK::gManager->SetTrackRenderer(EFK::gRenderer->CreateTrackRenderer());
-	EFK::gManager->SetModelRenderer(EFK::gRenderer->CreateModelRenderer());
+	gRenderer = EffekseerRendererDX11::Renderer::Create(grpDevice, 1024);
+	gManager->SetSpriteRenderer(EFK::gRenderer->CreateSpriteRenderer());
+	gManager->SetRibbonRenderer(EFK::gRenderer->CreateRibbonRenderer());
+	gManager->SetRingRenderer(EFK::gRenderer->CreateRingRenderer());
+	gManager->SetTrackRenderer(EFK::gRenderer->CreateTrackRenderer());
+	gManager->SetModelRenderer(EFK::gRenderer->CreateModelRenderer());
 
 	// Specify a texture, model, curve and material loader
 	// It can be extended by yourself. It is loaded from a file on now.
 	// テクスチャ、モデル、カーブ、マテリアルローダーの設定する。
 	// ユーザーが独自で拡張できる。現在はファイルから読み込んでいる。
-	EFK::gManager->SetTextureLoader(EFK::gRenderer->CreateTextureLoader());
-	EFK::gManager->SetModelLoader(EFK::gRenderer->CreateModelLoader());
-	EFK::gManager->SetMaterialLoader(EFK::gRenderer->CreateMaterialLoader());
-	EFK::gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
+	gManager->SetTextureLoader(EFK::gRenderer->CreateTextureLoader());
+	gManager->SetModelLoader(EFK::gRenderer->CreateModelLoader());
+	gManager->SetMaterialLoader(EFK::gRenderer->CreateMaterialLoader());
+	gManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
 }
 
 void EFK::Release()
@@ -64,12 +68,25 @@ void EFK::Update()
 void EFK::Draw()
 {
 	XMFLOAT4X4 proj;
-	XMStoreFloat4x4(&proj, Camera::GetProjectionMatrix());
+	XMStoreFloat4x4(&proj,EFK::GetProjMat(false));
 	XMFLOAT4X4 view;
-	XMStoreFloat4x4(&view, Camera::GetViewMatrix());
+	XMStoreFloat4x4(&view, EFK::GetViewMat(false));
+
+	//auto viewerPosition = ::Effekseer::Vector3D(0.0f, 2.0f, 2.0f);
+	////	// Specify a projection matrix
+	////	// 投影行列を設定
+	//::Effekseer::Matrix44 projectionMatrix;
+	//projectionMatrix.PerspectiveFovLH(90.0f / 180.0f * 3.14f, (float)800/ (float)600, 1.0f, 500.0f);
+	////	
+	//// Specify a camera matrix
+	//// カメラ行列を設定
+	//::Effekseer::Matrix44 cameraMatrix;
+	//cameraMatrix.LookAtLH(viewerPosition, ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f), ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
 
 	gRenderer->SetProjectionMatrix(CnvMat(proj));
 	gRenderer->SetCameraMatrix(CnvMat(view));
+	//gRenderer->SetProjectionMatrix(projectionMatrix);
+	//gRenderer->SetCameraMatrix(cameraMatrix);
 
 	gRenderer->BeginRendering();
 
@@ -107,13 +124,20 @@ void EFK::Draw()
 	//gRenderer->EndRendering();
 }
 
-Effekseer::Handle EFK::Play(std::wstring path, float x, float y, float z)
+
+Effekseer::Handle EFK::Play(fs::path _path, float x, float y, float z)
 {
-	if (EFK::gEffectList.count(path) == 0)
+	
+	if (!fs::exists(_path))
 	{
-		EFK::gEffectList[path] = Effect::Create(EFK::gManager, (const EFK_CHAR *)path.c_str());
+		return -1;
 	}
-	auto ret = EFK::gManager->Play(EFK::gEffectList[path], x, y, z);
+
+	if (EFK::gEffectList.count(_path) == 0)
+	{
+		EFK::gEffectList[_path] = Effect::Create(EFK::gManager, _path.u16string().c_str());
+	}
+	auto ret = EFK::gManager->Play(EFK::gEffectList[_path], x, y, z);
 	return ret;
 }
 
@@ -128,7 +152,6 @@ Matrix44 EFK::CnvMat(DirectX::XMFLOAT4X4 mat)
 {
 	Matrix44 out;
 
-	
 	out.Values[0][0] = mat._11;
 	out.Values[1][0] = mat._12;
 	out.Values[2][0] = mat._13;
